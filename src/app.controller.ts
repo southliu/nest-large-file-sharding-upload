@@ -62,6 +62,15 @@ export class AppController {
 
     const files = fs.readdirSync(chunkDir);
 
+    // 文件名排序
+    files.sort((a, b) => {
+      const aLastIndex = a.lastIndexOf('-');
+      const bLastIndex = b.lastIndexOf('-');
+      const aNumber = Number(a.substring(aLastIndex, a.length));
+      const bNumber = Number(b.substring(bLastIndex, b.length));
+      return bNumber - aNumber;
+    });
+
     let count = 0;
     let startPos = 0;
     files.map((file) => {

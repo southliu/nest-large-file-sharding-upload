@@ -23,18 +23,29 @@
             const chunks = [];
             let startPos = 0;
             while(startPos < file.size) {
-                chunks.push(file.slice(startPos, startPos + chunkSize));
+                chunks.push({
+                    data: file.slice(startPos, startPos + chunkSize),
+                    isSuccess: false
+                });
                 startPos += chunkSize;
             }
 
             const randomStr = Math.random().toString().slice(2, 8);
+            let tasks = [];
 
             chunks.map((chunk, index) => {
+                if (chunk.isSuccess) return;
                 const data = new FormData();
+
                 data.set('name', randomStr + '_' + file.name + '-' + index)
-                data.append('files', chunk);
-                axios.post('http://localhost:3000/upload', data);
+                data.append('files', chunk.data);
+                const item = axios.post('http://localhost:3000/upload', data).then(() => {
+                    chunks[index].isSuccess = true
+                });
+                tasks.push(item);
             })
+            await Promise.all(tasks);
+            axios.get('http://localhost:3000/merge?name=' + randomStr + '_' + file.name);
         
         }
 
